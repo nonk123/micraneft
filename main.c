@@ -1,7 +1,10 @@
 #include <stdio.h>
 
+#include "world.h"
+
 int main()
 {
-  printf("Hello, world!");
+  struct world world = generate_world(32, 16);
+  print_world(&world);
   return 0;
 }
