@@ -30,8 +30,9 @@ struct world generate_world(int width, int height)
 void print_world(struct world* world, int x0, int y0)
 {
   int x, y;
+  int tile_x, tile_y;
+
   int rows, cols;
-  int width, height;
 
   COORD coord;
 
@@ -43,17 +44,20 @@ void print_world(struct world* world, int x0, int y0)
 
   get_console_window_size(&rows, &cols);
 
-  width = min(cols, world->width);
-  height = min(rows - 1, world->height);
-
-  for (y = 0; y < height; y++)
+  for (y = 0; y < rows - 1; y++)
     {
-      for (x = 0; x < width; x++)
-        _putch(get_tile(world, x0 + x, y0 + y)->displayed_as);
+      tile_y = y0 + y;
 
-      /* Wrap manually if the world is smaller than the console window. */
-      if (width < cols && y < cols - 1)
-        _putch('\n');
+      for (x = 0; x < cols; x++)
+        {
+          tile_x = x0 + x;
+
+          if (tile_y >= 0 && tile_x >= 0
+              && tile_y < world->height && tile_x < world->width)
+            _putch(get_tile(world, tile_x, tile_y)->displayed_as);
+          else
+            _putch(' ');
+        }
     }
 }
 

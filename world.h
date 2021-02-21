@@ -1,11 +1,13 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-struct tile {
+struct tile
+{
   char displayed_as;
 };
 
-struct world {
+struct world
+{
   struct tile* tiles;
   int width, height;
 };
