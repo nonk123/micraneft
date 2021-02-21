@@ -12,8 +12,14 @@ struct world {
 
 struct world generate_world(int, int);
 
-void print_world(struct world*);
+void print_world(struct world*, int, int);
 
 struct tile* get_tile(struct world*, int, int);
 
-#endif
+#include <windows.h>
+
+HANDLE get_stdout();
+
+void get_console_window_size(int*, int*);
+
+#endif /* WORLD_H */

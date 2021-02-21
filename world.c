@@ -1,7 +1,8 @@
 #include "world.h"
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <conio.h>
 
 struct world generate_world(int width, int height)
 {
@@ -26,17 +27,33 @@ struct world generate_world(int width, int height)
   return world;
 }
 
-void print_world(struct world* world)
+void print_world(struct world* world, int x0, int y0)
 {
   int x, y;
+  int rows, cols;
+  int width, height;
 
-  for (y = 0; y < world->height; y++)
+  COORD coord;
+
+  coord.X = 0;
+  coord.Y = 0;
+
+  /* Overwrite everything. */
+  SetConsoleCursorPosition(get_stdout(), coord);
+
+  get_console_window_size(&rows, &cols);
+
+  width = min(cols, world->width);
+  height = min(rows - 1, world->height);
+
+  for (y = 0; y < height; y++)
     {
-      if (y > 0)
-        putchar('\n');
+      for (x = 0; x < width; x++)
+        _putch(get_tile(world, x0 + x, y0 + y)->displayed_as);
 
-      for (x = 0; x < world->width; x++)
-        putchar(get_tile(world, x, y)->displayed_as);
+      /* Wrap manually if the world is smaller than the console window. */
+      if (width < cols && y < cols - 1)
+        _putch('\n');
     }
 }
 
@@ -44,4 +61,26 @@ struct tile* get_tile(struct world* world, int x, int y)
 {
   int index = world->height * x + y;
   return &world->tiles[index];
+}
+
+/* Windows-specific functions (aka trash). */
+
+HANDLE get_stdout()
+{
+  static HANDLE stdout_handle = NULL;
+
+  if (stdout_handle == NULL)
+    stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
+
+  return stdout_handle;
+}
+
+void get_console_window_size(int* rows, int* cols)
+{
+  CONSOLE_SCREEN_BUFFER_INFO csbi;
+  GetConsoleScreenBufferInfo(get_stdout(), &csbi);
+
+  /* Not sure what's happening in the RHS. */
+  *cols = csbi.srWindow.Right - csbi.srWindow.Left + 1;
+  *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
