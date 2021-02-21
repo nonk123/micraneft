@@ -5,11 +5,21 @@
 
 #define FPS 20
 
+void disable_cursor()
+{
+  CONSOLE_CURSOR_INFO info;
+
+  info.dwSize = 100;
+  info.bVisible = FALSE;
+
+  SetConsoleCursorInfo(get_stdout(), &info);
+}
+
 /* If no key is pressed, return 0. Return its scancode otherwise. */
 char get_scancode()
 {
-  INPUT_RECORD records[1];
-  KEY_EVENT_RECORD record;
+  INPUT_RECORD record;
+  KEY_EVENT_RECORD event;
 
   DWORD available;
 
@@ -18,15 +28,16 @@ char get_scancode()
   if (available == 0)
     return 0;
 
-  ReadConsoleInput(get_stdin(), records, 1, &available);
-
-  if (records[0].EventType != KEY_EVENT)
+  if (!ReadConsoleInput(get_stdin(), &record, 1, &available))
     return 0;
 
-  record = records[0].Event.KeyEvent;
+  if (record.EventType != KEY_EVENT)
+    return 0;
 
-  if (record.bKeyDown)
-    return record.wVirtualScanCode;
+  event = record.Event.KeyEvent;
+
+  if (event.bKeyDown)
+    return event.wVirtualScanCode;
   else
     return 0;
 }
@@ -41,6 +52,8 @@ int main()
 
   for (;;)
     {
+      disable_cursor();
+
       switch (get_scancode())
         {
         case 0: /* no key */

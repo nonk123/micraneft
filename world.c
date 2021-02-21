@@ -184,6 +184,8 @@ void print_world(struct world* world)
 
   /* Prevent the screen from jumping around. */
   move_cursor_to(0, 0);
+
+  free(copy);
 }
 
 int is_opaque(struct tile* tile)
