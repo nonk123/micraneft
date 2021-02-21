@@ -22,6 +22,8 @@ struct tile* get_tile(struct world*, int, int);
 
 HANDLE get_stdout();
 
+HANDLE get_stdin();
+
 void get_console_window_size(int*, int*);
 
 #endif /* WORLD_H */

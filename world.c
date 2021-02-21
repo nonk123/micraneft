@@ -71,12 +71,12 @@ struct tile* get_tile(struct world* world, int x, int y)
 
 HANDLE get_stdout()
 {
-  static HANDLE stdout_handle = NULL;
+  return GetStdHandle(STD_OUTPUT_HANDLE);
+}
 
-  if (stdout_handle == NULL)
-    stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
-
-  return stdout_handle;
+HANDLE get_stdin()
+{
+  return GetStdHandle(STD_INPUT_HANDLE);
 }
 
 void get_console_window_size(int* rows, int* cols)
