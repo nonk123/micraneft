@@ -7,18 +7,18 @@
 
 #include "console.h"
 
-struct world generate_world(int width, int height)
+world_t generate_world(int width, int height)
 {
-  struct tile* buffer = calloc(width * height, sizeof(struct tile));
+  tile_t* buffer = calloc(width * height, sizeof(tile_t));
 
-  struct tile empty = {' '};
-  struct tile block = {'#'};
+  tile_t empty = {' '};
+  tile_t block = {'#'};
 
-  struct tile head = {'o'};
-  struct tile body = {'A'};
+  tile_t head = {'o'};
+  tile_t body = {'A'};
 
-  struct entity* player = malloc(sizeof(struct entity));
-  struct world world = {buffer, player, width, height, width * height};
+  entity_t* player = malloc(sizeof(entity_t));
+  world_t world = {buffer, player, width, height, width * height};
 
   int x, y;
 
@@ -55,7 +55,7 @@ struct world generate_world(int width, int height)
   player->width = 1;
   player->height = 2;
 
-  player->parts = calloc(2, sizeof(struct tile));
+  player->parts = calloc(2, sizeof(tile_t));
   player->parts[0] = head;
   player->parts[1] = body;
 
@@ -64,23 +64,23 @@ struct world generate_world(int width, int height)
   return world;
 }
 
-int is_opaque(struct tile* tile)
+int is_opaque(tile_t* tile)
 {
   return tile->displayed_as != ' ';
 }
 
-struct tile* get_tile(struct tile* tiles, int x, int y, int width, int height)
+tile_t* get_tile(tile_t* tiles, int x, int y, int width, int height)
 {
   int y_flipped = height - 1 - y;
   return &tiles[width * y_flipped + x];
 }
 
-struct tile* get_world_tile(struct world* world, int x, int y)
+tile_t* get_world_tile(world_t* world, int x, int y)
 {
   return get_tile(world->tiles, x, y, world->width, world->height);
 }
 
-struct tile* get_entity_tile(struct entity* entity, int x, int y)
+tile_t* get_entity_tile(entity_t* entity, int x, int y)
 {
   return get_tile(entity->parts, x, y, entity->width, entity->height);
 }

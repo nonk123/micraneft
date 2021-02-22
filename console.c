@@ -22,30 +22,51 @@ void get_console_window_size(int* rows, int* cols)
   *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
 
-int get_scancode()
+#define KEY_EVENTS_BUFFER 10
+
+key_event_t* receive_key_events()
 {
-  INPUT_RECORD record;
-  KEY_EVENT_RECORD event;
+  INPUT_RECORD records[KEY_EVENTS_BUFFER];
 
   DWORD available;
 
+  key_event_t empty = {1, 0, 0};
+  key_event_t* events = malloc(sizeof(key_event_t));
+
+  int i, index;
+
+  events[0] = empty;
+
   GetNumberOfConsoleInputEvents(get_stdin(), &available);
 
-  if (available == 0)
-    return 0;
+  if (!available)
+    return events;
 
-  if (!ReadConsoleInput(get_stdin(), &record, 1, &available))
-    return 0;
+  if (!ReadConsoleInput(get_stdin(), records, KEY_EVENTS_BUFFER, &available))
+    return events;
 
-  if (record.EventType != KEY_EVENT)
-    return 0;
+  events = realloc(events, (available + 1) * sizeof(key_event_t));
 
-  event = record.Event.KeyEvent;
+  for (index = -1, i = 0; i < available; i++)
+    {
+      if (records[i].EventType == KEY_EVENT)
+        index++;
+      else
+        continue;
 
-  if (event.bKeyDown)
-    return event.wVirtualScanCode;
-  else
-    return 0;
+      KEY_EVENT_RECORD record = records[i].Event.KeyEvent;
+      key_event_t event;
+
+      event.empty = 0;
+      event.down = record.bKeyDown;
+      event.scancode = record.wVirtualScanCode;
+
+      events[index] = event;
+    }
+
+  events[index + 1] = empty;
+
+  return events;
 }
 
 void disable_cursor()

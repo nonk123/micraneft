@@ -1,10 +1,14 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
+typedef struct key_event_t {
+  int empty;
+  int down, scancode;
+} key_event_t;
+
 void get_console_window_size(int*, int*);
 
-/* If no key is pressed, return 0. Return its scancode otherwise. */
-int get_scancode();
+key_event_t* receive_key_events();
 
 void disable_cursor();
 

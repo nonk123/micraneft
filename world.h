@@ -1,42 +1,39 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-struct tile
-{
+typedef struct tile_t {
   char displayed_as;
-};
+} tile_t;
 
-struct entity
-{
-  struct entity* next;
-  struct tile* parts;
+typedef struct entity_t {
+  struct entity_t* next;
+  tile_t* parts;
   int ix, iy; /* properly rounded x and y */
   int width, height;
   double x, y, vx, vy;
   int is_on_floor;
-};
+} entity_t;
 
-struct world
-{
-  struct tile* tiles;
-  struct entity* entities;
+typedef struct world_t {
+  tile_t* tiles;
+  entity_t* entities;
   const int width, height, area;
-};
+} world_t;
 
-struct world generate_world(int, int);
+world_t generate_world(int, int);
 
-int is_opaque(struct tile *);
+int is_opaque(tile_t *);
 
-struct tile *get_tile(struct tile *, int, int, int, int);
+tile_t *get_tile(tile_t *, int, int, int, int);
 
-struct tile *get_world_tile(struct world *, int, int);
+tile_t *get_world_tile(world_t *, int, int);
 
-struct tile *get_entity_tile(struct entity *, int, int);
+tile_t *get_entity_tile(entity_t *, int, int);
 
 /* Goes into print.c */
-void print_world(struct world *);
+void print_world(world_t *);
 
 /* Goes into tick.c */
-void physics_tick(struct world *, double);
+void physics_tick(world_t *, double);
 
 #endif /* WORLD_H */

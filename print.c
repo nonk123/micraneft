@@ -4,16 +4,16 @@
 #include "world.h"
 #include "console.h"
 
-void print_world(struct world* world)
+void print_world(world_t* world)
 {
   int x, y;
   int rows, cols;
 
-  int tiles_size = world->area * sizeof(struct tile);
+  int tiles_size = world->area * sizeof(tile_t);
 
   /* The tiles array is copied in order to reflect the entities inside it. */
-  struct tile* copy = malloc(tiles_size);
-  struct entity* node = world->entities;
+  tile_t* copy = malloc(tiles_size);
+  entity_t* node = world->entities;
 
   int x0, y0;
 
@@ -55,7 +55,7 @@ void print_world(struct world* world)
           if (tile_y >= 0 && tile_x >= 0
               && tile_y < world->height && tile_x < world->width)
             {
-              struct tile* tile = get_tile(copy, tile_x, tile_y, world->width, world->height);
+              tile_t* tile = get_tile(copy, tile_x, tile_y, world->width, world->height);
               putchar(tile->displayed_as);
             }
           else
