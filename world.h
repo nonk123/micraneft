@@ -25,10 +25,6 @@ struct world
 
 struct world generate_world(int, int);
 
-void physics_tick(struct world *, double);
-
-void print_world(struct world *);
-
 int is_opaque(struct tile *);
 
 struct tile *get_tile(struct tile *, int, int, int, int);
@@ -37,14 +33,10 @@ struct tile *get_world_tile(struct world *, int, int);
 
 struct tile *get_entity_tile(struct entity *, int, int);
 
-#include <windows.h>
+/* Goes into print.c */
+void print_world(struct world *);
 
-HANDLE get_stdout();
-
-HANDLE get_stdin();
-
-void move_cursor_to(int, int);
-
-void get_console_window_size(int*, int*);
+/* Goes into tick.c */
+void physics_tick(struct world *, double);
 
 #endif /* WORLD_H */

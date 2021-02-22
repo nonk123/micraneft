@@ -2,45 +2,9 @@
 #include <math.h>
 
 #include "world.h"
+#include "console.h"
 
-#define FPS 20
-
-void disable_cursor()
-{
-  CONSOLE_CURSOR_INFO info;
-
-  info.dwSize = 100;
-  info.bVisible = FALSE;
-
-  SetConsoleCursorInfo(get_stdout(), &info);
-}
-
-/* If no key is pressed, return 0. Return its scancode otherwise. */
-char get_scancode()
-{
-  INPUT_RECORD record;
-  KEY_EVENT_RECORD event;
-
-  DWORD available;
-
-  GetNumberOfConsoleInputEvents(get_stdin(), &available);
-
-  if (available == 0)
-    return 0;
-
-  if (!ReadConsoleInput(get_stdin(), &record, 1, &available))
-    return 0;
-
-  if (record.EventType != KEY_EVENT)
-    return 0;
-
-  event = record.Event.KeyEvent;
-
-  if (event.bKeyDown)
-    return event.wVirtualScanCode;
-  else
-    return 0;
-}
+#define FPS 16
 
 int main()
 {
