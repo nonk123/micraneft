@@ -1,5 +1,7 @@
 #include "console.h"
 
+#include <windows.h>
+
 HANDLE get_stdout()
 {
   return GetStdHandle(STD_OUTPUT_HANDLE);
