@@ -6,7 +6,7 @@
 #include "world.h"
 #include "console.h"
 
-#define FPS 16
+#define FPS 24
 
 typedef struct controls_t {
   int left, right, up;
@@ -68,7 +68,7 @@ int main()
       player->vx -= controls.left * walking_speed;
 
       physics_tick(&world, 1.0 / FPS);
-      print_world(&world);
+      print_world(&world, player->ix, player->iy + 1);
 
       Sleep(1000 / FPS);
     }

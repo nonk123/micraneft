@@ -31,7 +31,7 @@ tile_t *get_world_tile(world_t *, int, int);
 tile_t *get_entity_tile(entity_t *, int, int);
 
 /* Goes into print.c */
-void print_world(world_t *);
+void print_world(world_t *, int, int);
 
 /* Goes into tick.c */
 void physics_tick(world_t *, double);

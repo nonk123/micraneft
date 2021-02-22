@@ -1,29 +1,22 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "world.h"
 #include "console.h"
 
-void print_world(world_t* world)
+tile_t* copy_world(world_t* world)
 {
   int x, y;
-  int rows, cols;
 
-  int tiles_size = world->area * sizeof(tile_t);
+  int size = world->area * sizeof(tile_t);
 
-  /* The tiles array is copied in order to reflect the entities inside it. */
-  tile_t* copy = malloc(tiles_size);
   entity_t* node = world->entities;
 
-  int x0, y0;
+  tile_t* copy = malloc(size);
+  memcpy(copy, world->tiles, size);
 
-  memcpy(copy, world->tiles, tiles_size);
-
-  get_console_window_size(&rows, &cols);
-
-  x0 = node->ix - cols / 2;
-  y0 = node->iy - rows / 2 + 1; /* account for the head */
-
+  /* Project entities onto the copy. */
   while (node)
     {
       for (y = node->height - 1; y >= 0; y--)
@@ -41,29 +34,63 @@ void print_world(world_t* world)
       node = node->next;
     }
 
-  move_cursor_to(0, 0);
+  return copy;
+}
 
-  /* Print upside-down to make sure Y = 0 is at the bottom of the screen. */
-  for (y = rows - 1; y >= 0; y--)
+void print_world(world_t* world, int center_x, int center_y)
+{
+  int x, y;
+  int rows, cols;
+
+  int x0, y0;
+
+  static char* extra_buffer = NULL;
+
+  tile_t* copy = copy_world(world);
+
+  get_console_window_size(&rows, &cols);
+
+  if (extra_buffer == NULL)
+    extra_buffer = calloc(rows * cols, sizeof(char));
+  else
+    extra_buffer = realloc(extra_buffer, rows * cols * sizeof(char));
+
+  x0 = center_x - cols / 2;
+  y0 = center_y - rows / 2;
+
+  for (y = 0; y < rows; y++)
     {
       int tile_y = y0 + y;
 
       for (x = 0; x < cols; x++)
         {
+          char* in_buffer = &extra_buffer[rows * x + y];
+
           int tile_x = x0 + x;
 
           if (tile_y >= 0 && tile_x >= 0
               && tile_y < world->height && tile_x < world->width)
             {
-              tile_t* tile = get_tile(copy, tile_x, tile_y, world->width, world->height);
-              putchar(tile->displayed_as);
+              char ours = get_tile(copy, tile_x, tile_y, world->width, world->height)->displayed_as;
+
+              if (ours != *in_buffer)
+                {
+                  /* The entire world is upside-down. */
+                  move_cursor_to(x, rows - 1 - y);
+                  putchar(ours);
+                  *in_buffer = ours;
+                }
             }
           else
-            putchar(' ');
+            {
+              move_cursor_to(x, rows - 1 - y);
+              putchar(' ');
+              *in_buffer = ' ';
+            }
         }
     }
 
-  /* Prevent the screen from jumping around. */
+  /* Prevent jitteriness. */
   move_cursor_to(0, 0);
 
   free(copy);
