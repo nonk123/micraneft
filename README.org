@@ -6,14 +6,12 @@ A console-based platformer for Windows.
 - Press =ESC= to exit.
 
 If you accidentally click on the console window while the game is
-running, try right-clicking it. Be wary though: if you have any text in
-the clipboard, it will be inserted character by character, possibly
-freezing the game.
+running, press any key to unfreeze it.
 
 Some plans for the future:
-- Actually readable code.
+- Actually readable code (an impossible goal).
 - Breaking and placing blocks.
-- Proper world generation.
+- +Semi+-proper world generation.
 - Basic networked multiplayer.
 
 * Building
@@ -22,5 +20,5 @@ The game is meant to be built with MSVC Build Tools 2019.
 
 Open a "native tools command prompt" in the source folder, and run
 =nmake=. You can then start micraneft.exe by double-clicking it. The
-=nmake clean= target is also available; it will remove the executable
-and all the .obj files.
+=nmake clean= target is also available; it will remove the executable,
+and relevant .obj files.

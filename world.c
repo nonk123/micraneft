@@ -16,6 +16,9 @@
  */
 #define HILLS_HEIGHT 0.5
 
+/* The height of the grass layer. */
+#define GRASS_LAYER 2
+
 #define NOISE_PERIOD 64
 
 world_t generate_world(int width, int height)
@@ -24,11 +27,13 @@ world_t generate_world(int width, int height)
 
   tile_t* buffer = calloc(width * height, sizeof(tile_t));
 
-  tile_t empty = {' '};
-  tile_t block = {'#'};
+  tile_t empty = {' ', 7, 0};
 
-  tile_t head = {'o'};
-  tile_t body = {'A'};
+  tile_t grass = {'#', 10, 1};
+  tile_t dirt  = {'#',  6, 1};
+
+  tile_t head = {'o', 14, 1};
+  tile_t body = {'A',  3, 1};
 
   entity_t* player = malloc(sizeof(entity_t));
   world_t world = {buffer, player, width, height, width * height};
@@ -48,8 +53,11 @@ world_t generate_world(int width, int height)
 
       int result = bottom + top * positive;
 
-      for (y = 0; y < result; y++)
-        *get_world_tile(&world, x, y) = block;
+      for (y = 0; y < result - GRASS_LAYER; y++)
+        *get_world_tile(&world, x, y) = dirt;
+
+      for (; y < result; y++)
+        *get_world_tile(&world, x, y) = grass;
 
       /* Spawn the player in the center of the map. */
       if (x == width / 2)
@@ -82,9 +90,9 @@ world_t generate_world(int width, int height)
   return world;
 }
 
-int is_opaque(tile_t* tile)
+int tiles_equal_p(tile_t* a, tile_t* b)
 {
-  return tile->displayed_as != ' ';
+  return a->character == b->character && a->color == b->color;
 }
 
 tile_t* get_tile(tile_t* tiles, int x, int y, int width, int height)

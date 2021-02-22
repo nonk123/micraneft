@@ -86,6 +86,7 @@ int main()
       print_world(&world, player->ix, player->iy + 1);
 
       move_cursor_to(0, 0);
+      set_color(7);
       printf("FPS: %d", current_fps);
 
       ftime(&end);

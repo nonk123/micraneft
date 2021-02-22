@@ -69,6 +69,17 @@ key_event_t* receive_key_events()
   return events;
 }
 
+void set_color(unsigned char color)
+{
+  static unsigned char last_color = 0;
+
+  if (last_color != color)
+    {
+      SetConsoleTextAttribute(get_stdout(), color);
+      last_color = color;
+    }
+}
+
 void disable_cursor()
 {
   CONSOLE_CURSOR_INFO info;

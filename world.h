@@ -2,7 +2,9 @@
 #define WORLD_H
 
 typedef struct tile_t {
-  char displayed_as;
+  char character;
+  unsigned char color;
+  char opaque;
 } tile_t;
 
 typedef struct entity_t {
@@ -22,7 +24,7 @@ typedef struct world_t {
 
 world_t generate_world(int, int);
 
-int is_opaque(tile_t *);
+int tiles_equal_p(tile_t *, tile_t *);
 
 tile_t *get_tile(tile_t *, int, int, int, int);
 
