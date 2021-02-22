@@ -47,7 +47,7 @@ void accept_input(controls_t* controls)
 
 int main()
 {
-  world_t world = generate_world(128, 32);
+  world_t world = generate_world(1024, 64);
   entity_t* player = world.entities;
 
   controls_t controls = {0};

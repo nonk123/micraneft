@@ -30,7 +30,8 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
         }
     }
 
-  for (y = 0; y < entity->height; y++)
+  /* Traverse from top to bottom to make the check below work. */
+  for (y = entity->height - 1; y >= 0; y--)
     {
       int y0 = entity->iy + y;
 
@@ -40,14 +41,21 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
       if ((is_opaque(left) && entity->vx < 0.0)
           || (is_opaque(right) && entity->vx > 0.0))
         {
-          entity->vx = 0.0;
-          *x1 = entity->x;
+          /* Move up one tile. */
+          if (y == 0)
+            *y1 += 1;
+          else
+            {
+              entity->vx = 0.0;
+              *x1 = entity->x;
+            }
+
           break;
         }
     }
 }
 
-#define GRAVITY -10.0
+#define GRAVITY -12.4
 
 /* Used to determine close-to-zero coordinates. */
 #define EPSILON 0.01
@@ -60,6 +68,7 @@ void physics_tick(world_t* world, double delta)
     {
       double x1, y1;
 
+      /* Acceleration is m * s^(-2) */
       node->vy += GRAVITY * delta;
 
       /* Apply movement. */

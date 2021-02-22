@@ -4,11 +4,24 @@
 #include <stdio.h>
 #include <conio.h>
 #include <math.h>
+#include <time.h>
 
+#include "open-simplex-noise/open-simplex-noise.h"
 #include "console.h"
+
+/*
+ * The percentage of world height occupied by hills.
+ *
+ * Everything below is taken up by a big chunk of ground.
+ */
+#define HILLS_HEIGHT 0.5
+
+#define NOISE_PERIOD 64
 
 world_t generate_world(int width, int height)
 {
+  int x, y;
+
   tile_t* buffer = calloc(width * height, sizeof(tile_t));
 
   tile_t empty = {' '};
@@ -20,32 +33,37 @@ world_t generate_world(int width, int height)
   entity_t* player = malloc(sizeof(entity_t));
   world_t world = {buffer, player, width, height, width * height};
 
-  int x, y;
+  struct osn_context* osn;
+
+  open_simplex_noise(time(NULL), &osn);
 
   for (x = 0; x < width; x++)
     {
-      /* Fill the bottom half of the world. */
-      for (y = 0; y < height / 2; y++)
+      /* 1D noise. */
+      double noise = open_simplex_noise2(osn, (double) x / NOISE_PERIOD, 0.0);
+      double positive = 0.5 * (noise + 1.0);
+
+      int bottom = height * (1.0 - HILLS_HEIGHT);
+      int top = height * HILLS_HEIGHT;
+
+      int result = bottom + top * positive;
+
+      for (y = 0; y < result; y++)
         *get_world_tile(&world, x, y) = block;
+
+      /* Spawn the player in the center of the map. */
+      if (x == width / 2)
+        player->y = y;
 
       for (; y < height; y++)
         *get_world_tile(&world, x, y) = empty;
     }
 
-  /* A wall on the left. */
-  for (x = 0; x < 5; x++)
-    for (y = 0; y < height; y++)
-      *get_world_tile(&world, x, y) = block;
-
-  /* A hole on the right. */
-  for (x = 0; x < 5; x++)
-    for (y = 0; y < height / 2; y++)
-      *get_world_tile(&world, world.width - 16 - x, y) = empty;
+  open_simplex_noise_free(osn);
 
   /* Spawn a crappy player. */
 
   player->x = (double) width / 2;
-  player->y = (double) height / 2;
 
   player->ix = round(player->x);
   player->iy = round(player->y);
