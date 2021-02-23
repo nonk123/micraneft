@@ -1,14 +1,31 @@
 #ifndef CONSOLE_H
 #define CONSOLE_H
 
-typedef struct key_event_t {
-  int empty;
-  int down, scancode;
-} key_event_t;
+enum input_event_type {
+  TYPE_END,
+  TYPE_KEY_EVENT,
+  TYPE_MOUSE_EVENT,
+};
+
+typedef struct input_event_t {
+  enum input_event_type type;
+  union {
+    struct {
+      char down;
+      int scancode;
+    } key;
+    struct {
+      int x, y;
+      int button;
+    } mouse;
+  };
+} input_event_t;
+
+void prepare_console();
 
 void get_console_window_size(int*, int*);
 
-key_event_t* receive_key_events();
+input_event_t* receive_input_events();
 
 void set_color(int);
 

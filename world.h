@@ -1,10 +1,25 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#define WORLD_WIDTH 1024
+#define WORLD_HEIGHT 128
+
+#define GROUND_HEIGHT 64
+#define HILLS_HEIGHT 32
+
+/* The height of the grass layer. */
+#define GRASS_LAYER 2
+
+/* Place this many blocks of dirt below grass. Everything below this is stone. */
+#define DIRT_LAYER 8
+
+#define NOISE_PERIOD 64
+
+typedef unsigned char color_t;
+
 typedef struct tile_t {
   char character;
-  unsigned char bg, fg;
-  char opaque;
+  color_t bg, fg;
 } tile_t;
 
 typedef struct entity_t {
@@ -20,11 +35,9 @@ typedef struct entity_t {
 typedef struct world_t {
   tile_t* tiles;
   entity_t* entities;
-  const int width, height, area;
 } world_t;
 
-enum text_color
-{
+enum text_color {
   BLACK,
   BLUE,
   GREEN,
@@ -43,11 +56,22 @@ enum text_color
   BRIGHT_WHITE,
 };
 
-static const tile_t empty_tile = {' ', BLACK, WHITE, 0};
+static tile_t empty_tile = {' ', BLACK, WHITE};
+static tile_t sky_tile = {' ', LIGHT_AQUA, WHITE};
 
-world_t generate_world(int, int);
+world_t generate_world();
 
 int tiles_equal_p(tile_t *, tile_t *);
+
+int tile_opaque_p(tile_t *);
+
+int cursor_in_range(int, int);
+
+int can_place_tile_at(world_t *, int, int);
+
+void place_tile_at(world_t *, int, int, tile_t);
+
+void remove_tile_at(world_t *, int, int);
 
 tile_t *get_tile(tile_t *, int, int, int, int);
 

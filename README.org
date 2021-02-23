@@ -2,21 +2,19 @@
 
 A console-based platformer for Windows.
 
-- Use =WAD= and/or arrow keys to move.
-- Press =ESC= to exit.
-
-If you accidentally click on the console window while the game is
-running, press any key to unfreeze it.
+- =WAD= and/or arrow keys to walk.
+- Left and right click to place and break blocks.
+- =ESC= to exit.
 
 Some plans for the future:
 - Actually readable code (an impossible goal).
-- Breaking and placing blocks.
+- +Breaking and placing blocks.+
 - +Semi+-proper world generation.
 - Basic networked multiplayer.
 
 * Building
 
-The game is meant to be built with MSVC Build Tools 2019.
+This game is meant to be built with MSVC Build Tools 2019.
 
 Open a "native tools command prompt" in the source folder, and run
 =nmake=. You can then start micraneft.exe by double-clicking it. The

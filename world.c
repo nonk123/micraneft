@@ -9,67 +9,56 @@
 #include "open-simplex-noise/open-simplex-noise.h"
 #include "console.h"
 
-/*
- * The percentage of world height occupied by hills.
- *
- * Everything below is taken up by a big chunk of ground.
- */
-#define HILLS_HEIGHT 0.5
-
-/* The height of the grass layer. */
-#define GRASS_LAYER 2
-
-#define NOISE_PERIOD 64
-
-world_t generate_world(int width, int height)
+world_t generate_world()
 {
-  int x, y;
+  int x, y, i;
 
-  tile_t* buffer = calloc(width * height, sizeof(tile_t));
+  tile_t* buffer = calloc(WORLD_WIDTH * WORLD_HEIGHT, sizeof(tile_t));
 
-  tile_t grass = {' ', GREEN, WHITE, 1};
-  tile_t dirt  = {' ', YELLOW, WHITE, 1};
+  tile_t grass = {' ', GREEN, WHITE};
+  tile_t dirt  = {' ', YELLOW, WHITE};
+  tile_t stone = {' ', WHITE, WHITE};
 
-  tile_t head = {'o', BLACK, LIGHT_YELLOW, 1};
-  tile_t body = {'A', BLACK, LIGHT_BLUE, 1};
+  tile_t head = {'o', BLACK, LIGHT_YELLOW};
+  tile_t body = {'A', BLACK, LIGHT_BLUE};
 
   entity_t* player = malloc(sizeof(entity_t));
-  world_t world = {buffer, player, width, height, width * height};
+  world_t world = {buffer, player};
 
   struct osn_context* osn;
 
   open_simplex_noise(time(NULL), &osn);
 
-  for (x = 0; x < width; x++)
+  for (x = 0; x < WORLD_WIDTH; x++)
     {
       /* 1D noise. */
       double noise = open_simplex_noise2(osn, (double) x / NOISE_PERIOD, 0.0);
       double positive = 0.5 * (noise + 1.0);
 
-      int bottom = height * (1.0 - HILLS_HEIGHT);
-      int top = height * HILLS_HEIGHT;
+      int height = GROUND_HEIGHT + HILLS_HEIGHT * positive;
 
-      int result = bottom + top * positive;
+      for (y = 0; y < height - DIRT_LAYER - GRASS_LAYER; y++)
+        *get_world_tile(&world, x, y) = stone;
 
-      for (y = 0; y < result - GRASS_LAYER; y++)
+      for (i = 0; i < DIRT_LAYER; i++, y++)
         *get_world_tile(&world, x, y) = dirt;
 
-      for (; y < result; y++)
+      for (i = 0; i < GRASS_LAYER; i++, y++)
         *get_world_tile(&world, x, y) = grass;
 
       /* Spawn the player in the center of the map. */
-      if (x == width / 2)
+      if (x == WORLD_WIDTH / 2)
         player->y = y;
 
-      for (; y < height; y++)
-        *get_world_tile(&world, x, y) = empty_tile;
+      for (; y < WORLD_HEIGHT; y++)
+        *get_world_tile(&world, x, y) = sky_tile;
     }
 
   open_simplex_noise_free(osn);
 
   /* Spawn a crappy player. */
 
-  player->x = (double) width / 2;
+  player->x = (double) WORLD_WIDTH / 2;
 
   player->ix = round(player->x);
   player->iy = round(player->y);
@@ -93,6 +82,49 @@ int tiles_equal_p(tile_t* a, tile_t* b)
   return a->character == b->character && a->bg == b->bg && a->fg == b->fg;
 }
 
+int tile_opaque_p(tile_t* tile)
+{
+  return !tiles_equal_p(tile, &empty_tile) && !tiles_equal_p(tile, &sky_tile);
+}
+
+int can_place_tile_at(world_t* world, int x, int y)
+{
+  entity_t* node = world->entities;
+
+  if (tile_opaque_p(get_world_tile(world, x, y)))
+    return 0;
+
+  while (node != NULL)
+    {
+      int rx = x - node->ix;
+      int ry = y - node->iy;
+
+      if (rx >= 0 && ry >= 0 && rx < node->width && rx < node->height)
+        return 0;
+
+      node = node->next;
+    }
+
+  return 1;
+}
+
+void place_tile_at(world_t* world, int x, int y, tile_t tile)
+{
+  if (can_place_tile_at(world, x, y))
+    *get_world_tile(world, x, y) = tile;
+}
+
+void remove_tile_at(world_t* world, int x, int y)
+{
+  if (x >= 0 && y >= 0 && x < WORLD_WIDTH && y < WORLD_HEIGHT)
+    *get_world_tile(world, x, y) = sky_tile;
+}
+
+int cursor_in_range(int x, int y)
+{
+  return pow(x, 2.0) + pow(y, 2.0) <= 49.0;
+}
+
 tile_t* get_tile(tile_t* tiles, int x, int y, int width, int height)
 {
   int y_flipped = height - 1 - y;
@@ -101,7 +133,7 @@ tile_t* get_tile(tile_t* tiles, int x, int y, int width, int height)
 
 tile_t* get_world_tile(world_t* world, int x, int y)
 {
-  return get_tile(world->tiles, x, y, world->width, world->height);
+  return get_tile(world->tiles, x, y, WORLD_WIDTH, WORLD_HEIGHT);
 }
 
 tile_t* get_entity_tile(entity_t* entity, int x, int y)

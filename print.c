@@ -21,11 +21,8 @@ void project_world(frame_t* frame)
 {
   int x, y;
 
-  int width = frame->world->width;
-  int height = frame->world->height;
-
-  int x0 = frame->center_x - frame->cols / 2;
-  int y0 = frame->center_y - frame->rows / 2;
+  int x0 = frame->player->ix - frame->cols / 2;
+  int y0 = frame->player->iy - frame->rows / 2;
 
   entity_t* node = frame->world->entities;
 
@@ -38,7 +35,7 @@ void project_world(frame_t* frame)
         int tile_x = x0 + x;
         int tile_y = y0 + y;
 
-        if (tile_x >= 0 && tile_y >= 0 && tile_x < width && tile_y < height)
+        if (tile_x >= 0 && tile_y >= 0 && tile_x < WORLD_WIDTH && tile_y < WORLD_HEIGHT)
           *tile = *get_world_tile(frame->world, tile_x, tile_y);
         else
           *tile = empty_tile;
@@ -59,6 +56,9 @@ void project_world(frame_t* frame)
                 {
                   tile_t* tile = get_frame_tile(frame, screen_x, screen_y);
                   *tile = *get_entity_tile(node, x, y);
+
+                  if (tile->bg == BLACK)
+                    tile->bg = sky_tile.bg;
                 }
             }
         }
@@ -86,6 +86,20 @@ void project_fps(frame_t* frame)
     }
 }
 
+void project_cursor(frame_t* frame)
+{
+  int screen_x = frame->cols / 2 + frame->cursor_x;
+  int screen_y = frame->rows / 2 + frame->cursor_y;
+
+  if (screen_x >= 0 && screen_y >= 0 && screen_x < frame->cols && screen_y < frame->rows)
+    {
+      tile_t* that_tile = get_frame_tile(frame, screen_x, screen_y);
+
+      that_tile->character = 'X';
+      that_tile->fg = cursor_in_range(frame->cursor_x, frame->cursor_y) ? WHITE : RED;
+    }
+}
+
 void print_frame(frame_t frame)
 {
   int x, y, i;
@@ -108,6 +122,7 @@ void print_frame(frame_t frame)
 
   project_world(&frame);
   project_fps(&frame);
+  project_cursor(&frame);
 
   /* Redraw when the window size changes. */
   if (buffer_size != old_buffer_size)

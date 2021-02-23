@@ -5,9 +5,10 @@
 
 typedef struct frame_t {
   world_t* world;
-  int center_x, center_y; /* center on this tile in the world */
+  entity_t* player; /* center everything around this entity */
   tile_t* buffer; /* always set to NULL when initializing */
   int rows, cols; /* filled automatically */
+  int cursor_x, cursor_y;
   int fps;
 } frame_t;
 

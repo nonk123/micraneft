@@ -18,7 +18,7 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
       tile_t* above = get_world_tile(world, x0, entity->iy + entity->height);
       tile_t* below = get_world_tile(world, x0, entity->iy - 1);
 
-      if ((above->opaque && entity->vy > 0.0) || (below->opaque && entity->vy < 0.0))
+      if ((tile_opaque_p(above) && entity->vy > 0.0) || (tile_opaque_p(below) && entity->vy < 0.0))
         {
           if (entity->vy < 0.0)
             entity->is_on_floor = 1;
@@ -37,7 +37,7 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
       tile_t* left = get_world_tile(world, entity->ix - 1, y0);
       tile_t* right = get_world_tile(world, entity->ix + entity->width, y0);
 
-      if ((left->opaque && entity->vx < 0.0) || (right->opaque && entity->vx > 0.0))
+      if ((tile_opaque_p(left) && entity->vx < 0.0) || (tile_opaque_p(right) && entity->vx > 0.0))
         {
           /* Move up one tile. */
           if (y == 0)
@@ -81,8 +81,8 @@ void physics_tick(world_t* world, double delta)
 
       if (x1 < EPSILON)
         x1 = EPSILON;
-      else if (x1 > world->width - 1 - EPSILON)
-        x1 = world->width - 1 - EPSILON;
+      else if (x1 > WORLD_WIDTH - 1 - EPSILON)
+        x1 = WORLD_WIDTH - 1 - EPSILON;
 
       if (y1 < EPSILON)
         {
@@ -90,8 +90,8 @@ void physics_tick(world_t* world, double delta)
           node->is_on_floor = 1;
           y1 = EPSILON;
         }
-      else if (y1 > world->height - 1 - EPSILON)
-        y1 = world->height - 1 - EPSILON;
+      else if (y1 > WORLD_HEIGHT - 1 - EPSILON)
+        y1 = WORLD_HEIGHT - 1 - EPSILON;
 
       /* Finalize the changes. */
 

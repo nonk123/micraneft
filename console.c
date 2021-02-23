@@ -12,6 +12,11 @@ HANDLE get_stdin()
   return GetStdHandle(STD_INPUT_HANDLE);
 }
 
+void prepare_console()
+{
+  SetConsoleMode(get_stdin(), ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
+}
+
 void get_console_window_size(int* rows, int* cols)
 {
   CONSOLE_SCREEN_BUFFER_INFO csbi;
@@ -22,49 +27,57 @@ void get_console_window_size(int* rows, int* cols)
   *rows = csbi.srWindow.Bottom - csbi.srWindow.Top + 1;
 }
 
-#define KEY_EVENTS_BUFFER 10
+#define INPUT_EVENTS_BUFFER 10
 
-key_event_t* receive_key_events()
+input_event_t* receive_input_events()
 {
-  INPUT_RECORD records[KEY_EVENTS_BUFFER];
+  INPUT_RECORD records[INPUT_EVENTS_BUFFER];
 
   DWORD available;
 
-  key_event_t empty = {1, 0, 0};
-  key_event_t* events = malloc(sizeof(key_event_t));
+  input_event_t end = {TYPE_END};
+  input_event_t* events = malloc(sizeof(input_event_t));
 
-  int i, index;
+  int i;
 
-  events[0] = empty;
+  events[0] = end;
 
   GetNumberOfConsoleInputEvents(get_stdin(), &available);
 
   if (!available)
     return events;
 
-  if (!ReadConsoleInput(get_stdin(), records, KEY_EVENTS_BUFFER, &available))
+  if (!ReadConsoleInput(get_stdin(), records, INPUT_EVENTS_BUFFER, &available))
     return events;
 
-  events = realloc(events, (available + 1) * sizeof(key_event_t));
+  events = realloc(events, (available + 1) * sizeof(input_event_t));
 
-  for (index = -1, i = 0; i < available; i++)
+  for (i = 0; i < available; i++)
     {
+      input_event_t event;
+
       if (records[i].EventType == KEY_EVENT)
-        index++;
-      else
-        continue;
+        {
+          KEY_EVENT_RECORD record = records[i].Event.KeyEvent;
 
-      KEY_EVENT_RECORD record = records[i].Event.KeyEvent;
-      key_event_t event;
+          event.type = TYPE_KEY_EVENT;
+          event.key.down = record.bKeyDown;
+          event.key.scancode = record.wVirtualScanCode;
+        }
+      else if (records[i].EventType == MOUSE_EVENT)
+        {
+          MOUSE_EVENT_RECORD record = records[i].Event.MouseEvent;
 
-      event.empty = 0;
-      event.down = record.bKeyDown;
-      event.scancode = record.wVirtualScanCode;
+          event.type = TYPE_MOUSE_EVENT;
+          event.mouse.button = record.dwButtonState;
+          event.mouse.x = record.dwMousePosition.X;
+          event.mouse.y = record.dwMousePosition.Y;
+        }
 
-      events[index] = event;
+      events[i] = event;
     }
 
-  events[index + 1] = empty;
+  events[i] = end;
 
   return events;
 }
