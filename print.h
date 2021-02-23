@@ -10,6 +10,8 @@ typedef struct frame_t {
   int rows, cols; /* filled automatically */
   /* Set the fields below manually. */
   int cursor_x, cursor_y;
+  tile_t* hotbar;
+  int hotbar_size, hotbar_selection;
   int fps;
 } frame_t;
 

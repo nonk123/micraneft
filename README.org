@@ -1,10 +1,17 @@
 * Micraneft
 
-A console-based platformer for Windows.
+A 2D sandbox game for Windows.
 
+Features:
+- Real-time, 16-color display running in the console.
+- Full mouse and keyboard support.
+- You can build a house (kind of?)
+
+Controls:
 - =A= and =D= to walk.
 - Space to jump.
 - Click to place/break blocks.
+- Select blocks with number keys, scrolling, or by clicking the hotbar.
 - Esc to exit.
 
 Some plans for the future:

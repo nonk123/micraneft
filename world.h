@@ -56,8 +56,14 @@ enum text_color {
   BRIGHT_WHITE,
 };
 
+/* Common tiles. */
+
 static tile_t empty_tile = {' ', BLACK, WHITE};
 static tile_t sky_tile = {' ', LIGHT_AQUA, WHITE};
+
+static tile_t grass_tile = {' ', GREEN, WHITE};
+static tile_t dirt_tile  = {' ', YELLOW, WHITE};
+static tile_t stone_tile = {' ', WHITE, WHITE};
 
 world_t generate_world();
 

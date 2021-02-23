@@ -17,6 +17,7 @@ typedef struct input_event_t {
     struct {
       int x, y;
       int button;
+      int event;
     } mouse;
   };
 } input_event_t;

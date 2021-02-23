@@ -132,6 +132,34 @@ void project_resolution(frame_t* frame)
 
 #undef BUFFER
 
+void project_hotbar(frame_t *frame) {
+  int x, y, i;
+
+  int total_width = 1 + 2 * frame->hotbar_size;
+
+  int x0 = frame->cols / 2 - total_width / 2;
+  int y0 = 2;
+
+  tile_t panel = {' ', BLACK, WHITE};
+
+  /* Draw the hotbar panel. */
+  for (x = 0; x < total_width; x++)
+    for (y = 0; y < 2; y++)
+      *get_frame_tile(frame, x0 + x, y0 + y) = panel;
+
+  /* And put the hotbar items on top. */
+  for (i = 0, x = 1; x < total_width - 1; x += 2, i++)
+    {
+      tile_t number = {'1' + i, 0, 0};
+
+      number.bg = frame->hotbar_selection == i ? panel.fg : panel.bg;
+      number.fg = frame->hotbar_selection == i ? panel.bg : panel.fg;
+
+      *get_frame_tile(frame, x0 + x, y0) = number;
+      *get_frame_tile(frame, x0 + x, y0 + 1) = frame->hotbar[i];
+    }
+}
+
 void print_frame(frame_t frame)
 {
   int x, y, i;
@@ -142,7 +170,7 @@ void print_frame(frame_t frame)
   static int old_buffer_size = 0;
   int buffer_size;
 
-  /* Magic values to trigger the check below. */
+  /* Magic values to pass the check below. */
   int cursor_x = -2, cursor_y = 0;
 
   get_console_window_size(&frame.rows, &frame.cols);
@@ -156,6 +184,7 @@ void print_frame(frame_t frame)
   project_cursor(&frame);
   project_fps(&frame);
   project_resolution(&frame);
+  project_hotbar(&frame);
 
   /* Redraw when the window size changes. */
   if (buffer_size != old_buffer_size)

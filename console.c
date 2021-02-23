@@ -69,9 +69,10 @@ input_event_t* receive_input_events()
           MOUSE_EVENT_RECORD record = records[i].Event.MouseEvent;
 
           event.type = TYPE_MOUSE_EVENT;
-          event.mouse.button = record.dwButtonState;
           event.mouse.x = record.dwMousePosition.X;
           event.mouse.y = record.dwMousePosition.Y;
+          event.mouse.button = record.dwButtonState;
+          event.mouse.event = record.dwEventFlags;
         }
 
       events[i] = event;

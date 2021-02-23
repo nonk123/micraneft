@@ -15,10 +15,6 @@ world_t generate_world()
 
   tile_t* buffer = calloc(WORLD_WIDTH * WORLD_HEIGHT, sizeof(tile_t));
 
-  tile_t grass = {' ', GREEN, WHITE};
-  tile_t dirt  = {' ', YELLOW, WHITE};
-  tile_t stone = {' ', WHITE, WHITE};
-
   tile_t head = {'o', BLACK, LIGHT_YELLOW};
   tile_t body = {'A', BLACK, LIGHT_BLUE};
 
@@ -38,13 +34,13 @@ world_t generate_world()
       int height = GROUND_HEIGHT + HILLS_HEIGHT * positive;
 
       for (y = 0; y < height - DIRT_LAYER - GRASS_LAYER; y++)
-        *get_world_tile(&world, x, y) = stone;
+        *get_world_tile(&world, x, y) = stone_tile;
 
       for (i = 0; i < DIRT_LAYER; i++, y++)
-        *get_world_tile(&world, x, y) = dirt;
+        *get_world_tile(&world, x, y) = dirt_tile;
 
       for (i = 0; i < GRASS_LAYER; i++, y++)
-        *get_world_tile(&world, x, y) = grass;
+        *get_world_tile(&world, x, y) = grass_tile;
 
       /* Spawn the player in the center of the map. */
       if (x == WORLD_WIDTH / 2)
@@ -96,8 +92,8 @@ int can_place_tile_at(world_t* world, int x, int y)
 
   while (node != NULL)
     {
-      int rx = x - node->ix;
-      int ry = y - node->iy;
+      int rx = node->ix - x;
+      int ry = node->iy - y;
 
       if (rx >= 0 && ry >= 0 && rx < node->width && rx < node->height)
         return 0;
