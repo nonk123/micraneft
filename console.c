@@ -69,9 +69,9 @@ key_event_t* receive_key_events()
   return events;
 }
 
-void set_color(unsigned char color)
+void set_color(int color)
 {
-  static unsigned char last_color = 0;
+  static int last_color = 0;
 
   if (last_color != color)
     {

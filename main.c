@@ -5,6 +5,7 @@
 
 #include <windows.h>
 
+#include "print.h"
 #include "world.h"
 #include "console.h"
 
@@ -27,19 +28,21 @@ void accept_input(controls_t* controls, entity_t* player)
 
   while (!event.empty)
     {
+      int down = event.down;
+
       switch (event.scancode)
         {
         case 30: /* A */
         case 75: /* left */
-          controls->left = event.down;
+          controls->left = down;
           break;
         case 32: /* D */
         case 77: /* right */
-          controls->right = event.down;
+          controls->right = down;
           break;
         case 17: /* W */
         case 72: /* up */
-          controls->up = event.down;
+          controls->up = down;
           break;
         case 1:  /* ESC */
           exit(0);
@@ -76,20 +79,26 @@ int main()
     {
       struct timeb start, end;
 
+      frame_t frame;
+
+      frame.world = &world;
+      frame.fps = current_fps;
+
       ftime(&start);
 
       disable_cursor();
 
       accept_input(&controls, player);
-
       physics_tick(&world, physics_delta);
-      print_world(&world, player->ix, player->iy + 1);
 
-      move_cursor_to(0, 0);
-      set_color(7);
-      printf("FPS: %d", current_fps);
+      frame.center_x = player->ix;
+      frame.center_y = player->iy + 1;
+
+      print_frame(frame);
 
       ftime(&end);
+
+      /* FPS calculations. */
 
       current_frame = (end.time - start.time) + 0.001 * (end.millitm - start.millitm);
 

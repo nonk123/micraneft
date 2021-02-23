@@ -27,13 +27,11 @@ world_t generate_world(int width, int height)
 
   tile_t* buffer = calloc(width * height, sizeof(tile_t));
 
-  tile_t empty = {' ', 7, 0};
+  tile_t grass = {' ', GREEN, WHITE, 1};
+  tile_t dirt  = {' ', YELLOW, WHITE, 1};
 
-  tile_t grass = {'#', 10, 1};
-  tile_t dirt  = {'#',  6, 1};
-
-  tile_t head = {'o', 14, 1};
-  tile_t body = {'A',  3, 1};
+  tile_t head = {'o', BLACK, LIGHT_YELLOW, 1};
+  tile_t body = {'A', BLACK, LIGHT_BLUE, 1};
 
   entity_t* player = malloc(sizeof(entity_t));
   world_t world = {buffer, player, width, height, width * height};
@@ -64,7 +62,7 @@ world_t generate_world(int width, int height)
         player->y = y;
 
       for (; y < height; y++)
-        *get_world_tile(&world, x, y) = empty;
+        *get_world_tile(&world, x, y) = empty_tile;
     }
 
   open_simplex_noise_free(osn);
@@ -92,7 +90,7 @@ world_t generate_world(int width, int height)
 
 int tiles_equal_p(tile_t* a, tile_t* b)
 {
-  return a->character == b->character && a->color == b->color;
+  return a->character == b->character && a->bg == b->bg && a->fg == b->fg;
 }
 
 tile_t* get_tile(tile_t* tiles, int x, int y, int width, int height)

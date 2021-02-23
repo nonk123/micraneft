@@ -7,15 +7,15 @@ micraneft.exe: $(OBJ)
 
 # A weird workaround for a .c file in another directory.
 {open-simplex-noise\}.c{$(ODIR)}.obj::
-	$(CC) $(CFLAGS) $<
+	$(CC) /c $<
 
 open-simplex-noise.obj: open-simplex-noise\open-simplex-noise.h
 
-print.obj: world.h console.h
+print.obj: print.h world.h console.h
 tick.obj: world.h
 console.obj: console.h
 world.obj: world.h console.h open-simplex-noise\open-simplex-noise.h
-main.obj: world.h console.h
+main.obj: print.h world.h console.h
 
-clean :
+clean:
 	-rm micraneft.exe $(OBJ)

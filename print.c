@@ -1,3 +1,5 @@
+#include "print.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -5,104 +7,145 @@
 #include "world.h"
 #include "console.h"
 
-tile_t* copy_world(world_t* world)
+tile_t* get_buffer_tile(tile_t* buffer, int x, int y, int rows)
+{
+  return &buffer[rows * x + y];
+}
+
+tile_t* get_frame_tile(frame_t* frame, int x, int y)
+{
+  return get_buffer_tile(frame->buffer, x, y, frame->rows);
+}
+
+void project_world(frame_t* frame)
 {
   int x, y;
 
-  int size = world->area * sizeof(tile_t);
+  int width = frame->world->width;
+  int height = frame->world->height;
 
-  entity_t* node = world->entities;
+  int x0 = frame->center_x - frame->cols / 2;
+  int y0 = frame->center_y - frame->rows / 2;
 
-  tile_t* copy = malloc(size);
-  memcpy(copy, world->tiles, size);
+  entity_t* node = frame->world->entities;
 
-  /* Project entities onto the copy. */
+  /* Project the tiles. */
+  for (x = 0; x < frame->cols; x++)
+    for (y = 0; y < frame->rows; y++)
+      {
+        tile_t* tile = get_frame_tile(frame, x, y);
+
+        int tile_x = x0 + x;
+        int tile_y = y0 + y;
+
+        if (tile_x >= 0 && tile_y >= 0 && tile_x < width && tile_y < height)
+          *tile = *get_world_tile(frame->world, tile_x, tile_y);
+        else
+          *tile = empty_tile;
+      }
+
+  /* Project the entities. */
   while (node)
     {
-      for (y = node->height - 1; y >= 0; y--)
+      for (y = 0; y < node->height; y++)
         {
-          int entity_y = node->iy + y;
+          int screen_y = node->iy + y - y0;
 
           for (x = 0; x < node->width; x++)
             {
-              int entity_x = node->ix + x;
+              int screen_x = node->ix + x - x0;
 
-              *get_tile(copy, entity_x, entity_y, world->width, world->height)
-                = *get_entity_tile(node, x, y);
+              if (screen_x >= 0 && screen_y >= 0 && screen_x < frame->cols && screen_y < frame->rows)
+                {
+                  tile_t* tile = get_frame_tile(frame, screen_x, screen_y);
+                  *tile = *get_entity_tile(node, x, y);
+                }
             }
         }
+
       node = node->next;
     }
-
-  return copy;
 }
 
-void print_world(world_t* world, int center_x, int center_y)
+void project_fps(frame_t* frame)
 {
-  int x, y;
-  int rows, cols;
+  int i;
+  char string[24];
 
-  int x0, y0;
+  sprintf(string, "FPS: %d", frame->fps);
 
-  static tile_t* extra_buffer = NULL;
-  static int buffer_size = 0;
+  for (i = 0; string[i] != '\0'; i++)
+    {
+      /* Strip of text in the top-left corner. */
+      tile_t* tile = get_frame_tile(frame, i, frame->rows - 1);
 
-  int old_buffer_size;
+      *tile = empty_tile;
+      tile->bg = WHITE;
+      tile->fg = BLACK;
+      tile->character = string[i];
+    }
+}
 
-  tile_t* copy = copy_world(world);
+void print_frame(frame_t frame)
+{
+  int x, y, i;
+
+  static tile_t* backbuffer = NULL;
+  frame_t* this_frame;
+
+  static int old_buffer_size = 0;
+  int buffer_size;
 
   /* Magic values to trigger the check below. */
   int cursor_x = -2, cursor_y = 0;
 
-  get_console_window_size(&rows, &cols);
+  get_console_window_size(&frame.rows, &frame.cols);
 
-  old_buffer_size = buffer_size;
-  buffer_size = rows * cols * sizeof(tile_t);
+  buffer_size = frame.rows * frame.cols * sizeof(tile_t);
 
-  extra_buffer = realloc(extra_buffer, buffer_size);
+  frame.buffer = malloc(buffer_size);
+  backbuffer = realloc(backbuffer, buffer_size);
+
+  project_world(&frame);
+  project_fps(&frame);
 
   /* Redraw when the window size changes. */
-  if (old_buffer_size != buffer_size)
-    memset(extra_buffer, 0, buffer_size);
+  if (buffer_size != old_buffer_size)
+    memset(backbuffer, 0, buffer_size); /* fill with trash */
 
-  x0 = center_x - cols / 2;
-  y0 = center_y - rows / 2;
+  old_buffer_size = buffer_size;
 
-  for (y = 0; y < rows; y++)
-    {
-      int tile_y = y0 + y;
+  for (y = 0; y < frame.rows; y++)
+    for (x = 0; x < frame.cols; x++)
+      {
+        tile_t* draw = get_frame_tile(&frame, x, y);
+        int equal = 0;
 
-      for (x = 0; x < cols; x++)
-        {
-          tile_t* in_buffer = &extra_buffer[rows * x + y];
-          tile_t draw = {' ', 7, 0};
+        if (backbuffer != NULL)
+          {
+            tile_t* behind = get_buffer_tile(backbuffer, x, y, frame.rows);
+            equal = tiles_equal_p(draw, behind);
+          }
 
-          int tile_x = x0 + x;
-
-          if (tile_y >= 0 && tile_x >= 0 && tile_y < world->height && tile_x < world->width)
-            draw = *get_tile(copy, tile_x, tile_y, world->width, world->height);
-
-          if (!tiles_equal_p(&draw, in_buffer))
-            {
-              /* putchar moves the cursor right anyways. */
-              if (cursor_y != y || x - cursor_x > 1)
+        if (!equal)
+          {
+            /* putchar moves the cursor anyways. */
+            if ((cursor_y != y || x - cursor_x > 1) || (cursor_y == y - 1 && x == 0))
                 /* The entire world is upside-down. */
-                move_cursor_to(x, rows - 1 - y);
+                move_cursor_to(x, frame.rows - 1 - y);
 
-              set_color(draw.color);
-              putchar(draw.character);
+            set_color(16 * draw->bg + draw->fg);
+            putchar(draw->character);
 
-              *in_buffer = draw;
+            cursor_x = x;
+            cursor_y = y;
+          }
+      }
 
-              cursor_x = x;
-              cursor_y = y;
-            }
-        }
-    }
+  memcpy(backbuffer, frame.buffer, buffer_size);
+  free(frame.buffer);
 
-  /* Prevent jitteriness. */
+  /* Restore formatting in case we'll exit. */
   move_cursor_to(0, 0);
-  set_color(7);
-
-  free(copy);
+  set_color(WHITE);
 }
