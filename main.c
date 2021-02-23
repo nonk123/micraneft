@@ -114,7 +114,7 @@ void accept_input(controls_t* controls, entity_t* player, world_t* world)
   player->vx = controls->right * walking_speed;
   player->vx -= controls->left * walking_speed;
 
-  if (cursor_in_range(controls->cursor_x, controls->cursor_y))
+  if (is_cursor_in_range(controls->cursor_x, controls->cursor_y))
     {
       tile_t tile = controls->hotbar[controls->hotbar_selection];
 
@@ -166,7 +166,7 @@ int main()
   controls.cursor_y = -1.0;
 
   init_hotbar(controls.hotbar);
-  prepare_console();
+  enable_mouse();
 
   for (;;)
     {

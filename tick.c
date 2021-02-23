@@ -15,10 +15,11 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
     {
       int x0 = entity->ix + x;
 
-      tile_t* above = get_world_tile(world, x0, entity->iy + entity->height);
-      tile_t* below = get_world_tile(world, x0, entity->iy - 1);
+      tile_t* above = get_tile(world, x0, entity->iy + entity->height);
+      tile_t* below = get_tile(world, x0, entity->iy - 1);
 
-      if ((tile_opaque_p(above) && entity->vy > 0.0) || (tile_opaque_p(below) && entity->vy < 0.0))
+      if ((is_occupied(above) && entity->vy > 0.0)
+          || (is_occupied(below) && entity->vy < 0.0))
         {
           if (entity->vy < 0.0)
             entity->is_on_floor = 1;
@@ -34,15 +35,16 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
     {
       int y0 = entity->iy + y;
 
-      tile_t* left = get_world_tile(world, entity->ix - 1, y0);
-      tile_t* right = get_world_tile(world, entity->ix + entity->width, y0);
+      tile_t* left = get_tile(world, entity->ix - 1, y0);
+      tile_t* right = get_tile(world, entity->ix + entity->width, y0);
 
-      if ((tile_opaque_p(left) && entity->vx < 0.0) || (tile_opaque_p(right) && entity->vx > 0.0))
+      if ((is_occupied(left) && entity->vx < 0.0)
+          || (is_occupied(right) && entity->vx > 0.0))
         {
-          tile_t* above = get_world_tile(world, entity->ix, entity->iy + entity->height);
+          tile_t* above = get_tile(world, entity->ix, entity->iy + entity->height);
 
           /* Move up one tile if there's enough space. */
-          if (y == 0 && !tile_opaque_p(above))
+          if (y == 0 && !is_occupied(above))
             *y1 += 1;
           else
             {

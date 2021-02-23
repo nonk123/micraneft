@@ -12,7 +12,7 @@ HANDLE get_stdin()
   return GetStdHandle(STD_INPUT_HANDLE);
 }
 
-void prepare_console()
+void enable_mouse()
 {
   SetConsoleMode(get_stdin(), ENABLE_MOUSE_INPUT | ENABLE_EXTENDED_FLAGS);
 }

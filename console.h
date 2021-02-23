@@ -22,7 +22,7 @@ typedef struct input_event_t {
   };
 } input_event_t;
 
-void prepare_console();
+void enable_mouse();
 
 void get_console_window_size(int*, int*);
 

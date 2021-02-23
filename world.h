@@ -34,7 +34,7 @@ typedef struct entity_t {
 
 typedef struct world_t {
   tile_t* tiles;
-  entity_t* entities;
+  entity_t* entities; /* a linked list */
 } world_t;
 
 enum text_color {
@@ -59,7 +59,6 @@ enum text_color {
 /* Common tiles. */
 
 static tile_t empty_tile = {' ', BLACK, WHITE};
-static tile_t sky_tile = {' ', LIGHT_AQUA, WHITE};
 
 static tile_t grass_tile = {' ', GREEN, WHITE};
 static tile_t dirt_tile  = {' ', YELLOW, WHITE};
@@ -67,11 +66,11 @@ static tile_t stone_tile = {' ', WHITE, WHITE};
 
 world_t generate_world();
 
-int tiles_equal_p(tile_t *, tile_t *);
+int are_tiles_equal(tile_t *, tile_t *);
 
-int tile_opaque_p(tile_t *);
+int is_occupied(tile_t *);
 
-int cursor_in_range(int, int);
+int is_cursor_in_range(int, int);
 
 int can_place_tile_at(world_t *, int, int);
 
@@ -79,11 +78,9 @@ void place_tile_at(world_t *, int, int, tile_t);
 
 void remove_tile_at(world_t *, int, int);
 
-tile_t *get_tile(tile_t *, int, int, int, int);
+tile_t *get_tile(world_t *, int, int);
 
-tile_t *get_world_tile(world_t *, int, int);
-
-tile_t *get_entity_tile(entity_t *, int, int);
+tile_t *get_part(entity_t *, int, int);
 
 /* Goes into tick.c */
 void physics_tick(world_t *, double);

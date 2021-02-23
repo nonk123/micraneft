@@ -2,22 +2,27 @@
 
 A 2D sandbox game for Windows.
 
-Features:
+** Features
+
 - Real-time, 16-color display running in the console.
 - Full mouse and keyboard support.
 - You can build a house (kind of?)
 
-Controls:
+** Controls
+
 - =A= and =D= to walk.
 - Space to jump.
 - Click to place/break blocks.
 - Select blocks with number keys, scrolling, or by clicking the hotbar.
 - Esc to exit.
 
-Some plans for the future:
+** Plans
+
 - Actually readable code (an impossible goal).
 - +Breaking and placing blocks.+
+- Interactive blocks.
 - +Semi+-proper world generation.
+- Survival, inventory, and crafting.
 - Basic networked multiplayer.
 
 * Building

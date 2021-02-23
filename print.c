@@ -36,7 +36,7 @@ void project_world(frame_t* frame)
         int tile_y = y0 + y;
 
         if (tile_x >= 0 && tile_y >= 0 && tile_x < WORLD_WIDTH && tile_y < WORLD_HEIGHT)
-          *tile = *get_world_tile(frame->world, tile_x, tile_y);
+          *tile = *get_tile(frame->world, tile_x, tile_y);
         else
           *tile = empty_tile;
       }
@@ -55,10 +55,7 @@ void project_world(frame_t* frame)
               if (screen_x >= 0 && screen_y >= 0 && screen_x < frame->cols && screen_y < frame->rows)
                 {
                   tile_t* tile = get_frame_tile(frame, screen_x, screen_y);
-                  *tile = *get_entity_tile(node, x, y);
-
-                  if (tile->bg == BLACK)
-                    tile->bg = sky_tile.bg;
+                  *tile = *get_part(node, x, y);
                 }
             }
         }
@@ -79,9 +76,9 @@ void project_cursor(frame_t* frame)
       int world_x = frame->player->ix + frame->cursor_x;
       int world_y = frame->player->iy + frame->cursor_y;
 
-      tile_t* tile_at_cursor = get_world_tile(frame->world, world_x, world_y);
+      tile_t* tile_at_cursor = get_tile(frame->world, world_x, world_y);
 
-      int can_reach = cursor_in_range(frame->cursor_x, frame->cursor_y);
+      int can_reach = is_cursor_in_range(frame->cursor_x, frame->cursor_y);
       int can_place = can_place_tile_at(frame->world, world_x, world_y);
 
       that_tile->character = 'X';
@@ -201,7 +198,7 @@ void print_frame(frame_t frame)
         if (backbuffer != NULL)
           {
             tile_t* behind = get_buffer_tile(backbuffer, x, y, frame.rows);
-            equal = tiles_equal_p(draw, behind);
+            equal = are_tiles_equal(draw, behind);
           }
 
         if (!equal)
