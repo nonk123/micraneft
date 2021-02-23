@@ -39,8 +39,10 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
 
       if ((tile_opaque_p(left) && entity->vx < 0.0) || (tile_opaque_p(right) && entity->vx > 0.0))
         {
-          /* Move up one tile. */
-          if (y == 0)
+          tile_t* above = get_world_tile(world, entity->ix, entity->iy + entity->height);
+
+          /* Move up one tile if there's enough space. */
+          if (y == 0 && !tile_opaque_p(above))
             *y1 += 1;
           else
             {

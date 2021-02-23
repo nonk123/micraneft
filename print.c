@@ -67,10 +67,34 @@ void project_world(frame_t* frame)
     }
 }
 
+void project_cursor(frame_t* frame)
+{
+  int screen_x = frame->cols / 2 + frame->cursor_x;
+  int screen_y = frame->rows / 2 + frame->cursor_y;
+
+  if (screen_x >= 0 && screen_y >= 0 && screen_x < frame->cols && screen_y < frame->rows)
+    {
+      tile_t* that_tile = get_frame_tile(frame, screen_x, screen_y);
+
+      int world_x = frame->player->ix + frame->cursor_x;
+      int world_y = frame->player->iy + frame->cursor_y;
+
+      tile_t* tile_at_cursor = get_world_tile(frame->world, world_x, world_y);
+
+      int can_reach = cursor_in_range(frame->cursor_x, frame->cursor_y);
+      int can_place = can_place_tile_at(frame->world, world_x, world_y);
+
+      that_tile->character = 'X';
+      that_tile->fg = can_place && can_reach ? LIGHT_YELLOW : LIGHT_RED;
+    }
+}
+
+#define BUFFER 64
+
 void project_fps(frame_t* frame)
 {
   int i;
-  char string[24];
+  char string[BUFFER];
 
   sprintf(string, "FPS: %d", frame->fps);
 
@@ -86,19 +110,27 @@ void project_fps(frame_t* frame)
     }
 }
 
-void project_cursor(frame_t* frame)
+void project_resolution(frame_t* frame)
 {
-  int screen_x = frame->cols / 2 + frame->cursor_x;
-  int screen_y = frame->rows / 2 + frame->cursor_y;
+  int i, len;
+  char string[BUFFER];
 
-  if (screen_x >= 0 && screen_y >= 0 && screen_x < frame->cols && screen_y < frame->rows)
+  sprintf(string, "%dx%d", frame->cols, frame->rows);
+
+  len = strlen(string);
+
+  for (i = 0; i < len; i++)
     {
-      tile_t* that_tile = get_frame_tile(frame, screen_x, screen_y);
+      /* Top-right corner. */
+      tile_t* tile = get_frame_tile(frame, frame->cols - len + i, frame->rows - 1);
 
-      that_tile->character = 'X';
-      that_tile->fg = cursor_in_range(frame->cursor_x, frame->cursor_y) ? WHITE : RED;
+      tile->bg = WHITE;
+      tile->fg = BLACK;
+      tile->character = string[i];
     }
 }
+
+#undef BUFFER
 
 void print_frame(frame_t frame)
 {
@@ -121,12 +153,13 @@ void print_frame(frame_t frame)
   backbuffer = realloc(backbuffer, buffer_size);
 
   project_world(&frame);
-  project_fps(&frame);
   project_cursor(&frame);
+  project_fps(&frame);
+  project_resolution(&frame);
 
   /* Redraw when the window size changes. */
   if (buffer_size != old_buffer_size)
-    memset(backbuffer, 0, buffer_size); /* fill with trash */
+    memset(backbuffer, 0, buffer_size); /* fill with junk */
 
   old_buffer_size = buffer_size;
 

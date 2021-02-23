@@ -105,6 +105,19 @@ int can_place_tile_at(world_t* world, int x, int y)
       node = node->next;
     }
 
+  if (x > 0 && y > 0 && x < WORLD_WIDTH - 1 && y < WORLD_HEIGHT - 1)
+    {
+      /* Check if the tile is connected to another tile. */
+      tile_t* left = get_world_tile(world, x - 1, y);
+      tile_t* right = get_world_tile(world, x + 1, y);
+      tile_t* below = get_world_tile(world, x, y - 1);
+      tile_t* above = get_world_tile(world, x, y + 1);
+
+      if (!tile_opaque_p(left) && !tile_opaque_p(right)
+          && !tile_opaque_p(above) && !tile_opaque_p(below))
+        return 0;
+    }
+
   return 1;
 }
 

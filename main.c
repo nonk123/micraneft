@@ -15,7 +15,7 @@
 #define PHYSICS_DELTA (1.0 / PHYSICS_FPS)
 
 typedef struct controls_t {
-  int left, right, up;
+  int left, right, jump;
   int cursor_x, cursor_y; /* relative to the center of the screen */
   int breaking, placing;
 } controls_t;
@@ -33,16 +33,13 @@ void process_input_event(controls_t* controls, input_event_t event)
       switch (event.key.scancode)
         {
         case 30: /* A */
-        case 75: /* left */
           controls->left = down;
           break;
         case 32: /* D */
-        case 77: /* right */
           controls->right = down;
           break;
-        case 17: /* W */
-        case 72: /* up */
-          controls->up = down;
+        case 57: /* Spacebar */
+          controls->jump = down;
           break;
         case 1:  /* ESC */
           exit(0);
@@ -76,7 +73,7 @@ void accept_input(controls_t* controls, entity_t* player, world_t* world)
 
   free(events);
 
-  if (controls->up && player->is_on_floor)
+  if (controls->jump && player->is_on_floor)
     player->vy = jump_power;
 
   player->vx = controls->right * walking_speed;
@@ -108,8 +105,8 @@ int main()
 
   int actual_fps = 0, current_fps = 0;
 
-  controls.cursor_x = 1.0;
-  controls.cursor_y = 0.0;
+  controls.cursor_x = 0.0;
+  controls.cursor_y = -1.0;
 
   prepare_console();
 

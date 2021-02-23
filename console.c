@@ -82,6 +82,8 @@ input_event_t* receive_input_events()
   return events;
 }
 
+#undef INPUT_EVENTS_BUFFER
+
 void set_color(int color)
 {
   static int last_color = 0;

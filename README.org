@@ -2,9 +2,10 @@
 
 A console-based platformer for Windows.
 
-- =WAD= and/or arrow keys to walk.
-- Left and right click to place and break blocks.
-- =ESC= to exit.
+- =A= and =D= to walk.
+- Space to jump.
+- Click to place/break blocks.
+- Esc to exit.
 
 Some plans for the future:
 - Actually readable code (an impossible goal).
