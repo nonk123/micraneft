@@ -148,12 +148,16 @@ void project_hotbar(frame_t *frame) {
   for (i = 0, x = 1; x < total_width - 1; x += 2, i++)
     {
       tile_t number = {'1' + i, 0, 0};
+      tile_t entry = frame->hotbar[i];
 
       number.bg = frame->hotbar_selection == i ? panel.fg : panel.bg;
       number.fg = frame->hotbar_selection == i ? panel.bg : panel.fg;
 
+      if (entry.bg == BACKGROUND)
+        entry.bg = panel.bg;
+
       *get_frame_tile(frame, x0 + x, y0) = number;
-      *get_frame_tile(frame, x0 + x, y0 + 1) = frame->hotbar[i];
+      *get_frame_tile(frame, x0 + x, y0 + 1) = entry;
     }
 }
 

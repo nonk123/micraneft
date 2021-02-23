@@ -1,22 +1,43 @@
 #include "world.h"
 
 #include <stdlib.h>
-#include <stdio.h>
-#include <conio.h>
 #include <math.h>
 #include <time.h>
 
 #include "open-simplex-noise/open-simplex-noise.h"
+
 #include "console.h"
+
+void initialize_player(entity_t* player)
+{
+  tile_t head = {'o', BACKGROUND, LIGHT_YELLOW};
+  tile_t body = {'A', BACKGROUND, BLUE};
+
+  player->is_player = 1;
+
+  player->x = (double) WORLD_WIDTH / 2;
+  /* Assumes the Y has already been set. */
+
+  player->ix = round(player->x);
+  player->iy = round(player->y);
+
+  player->vx = player->vy = 0.0;
+
+  player->width = 1;
+  player->height = 2;
+
+  player->parts = calloc(2, sizeof(tile_t));
+  player->parts[0] = head;
+  player->parts[1] = body;
+
+  player->next = NULL;
+}
 
 world_t generate_world()
 {
   int x, y, i;
 
   tile_t* buffer = calloc(WORLD_WIDTH * WORLD_HEIGHT, sizeof(tile_t));
-
-  tile_t head = {'o', BLACK, LIGHT_YELLOW};
-  tile_t body = {'A', BLACK, LIGHT_BLUE};
 
   entity_t* player = malloc(sizeof(entity_t));
   world_t world = {buffer, player};
@@ -51,24 +72,7 @@ world_t generate_world()
     }
 
   open_simplex_noise_free(osn);
-
-  /* Spawn a crappy player. */
-
-  player->x = (double) WORLD_WIDTH / 2;
-
-  player->ix = round(player->x);
-  player->iy = round(player->y);
-
-  player->vx = player->vy = 0.0;
-
-  player->width = 1;
-  player->height = 2;
-
-  player->parts = calloc(2, sizeof(tile_t));
-  player->parts[0] = head;
-  player->parts[1] = body;
-
-  player->next = NULL;
+  initialize_player(player);
 
   return world;
 }
@@ -81,6 +85,13 @@ int are_tiles_equal(tile_t* a, tile_t* b)
 int is_occupied(tile_t* tile)
 {
   return !are_tiles_equal(tile, &empty_tile);
+}
+
+int is_impassable(tile_t* tile, entity_t* for_target)
+{
+  return is_occupied(tile)
+    && !(tile->properties & CLIMBABLE)
+    && !((tile->properties & DOOR) && for_target->is_player);
 }
 
 int is_cursor_in_range(int x, int y)

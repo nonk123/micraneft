@@ -8,16 +8,13 @@
 #include "world.h"
 #include "console.h"
 
-#define PHYSICS_FPS 30
-#define MAX_FPS 60
-
-#define MIN_DELTA (1.0 / MAX_FPS)
-#define PHYSICS_DELTA (1.0 / PHYSICS_FPS)
+#define RENDERING_FPS 60
+#define MIN_DELTA (1.0 / RENDERING_FPS)
 
 #define HOTBAR_SIZE 9
 
 typedef struct controls_t {
-  int left, right, jump;
+  int up, down, left, right, jump;
   int cursor_x, cursor_y; /* relative to the center of the screen */
   int breaking, placing;
   tile_t hotbar[HOTBAR_SIZE];
@@ -37,8 +34,14 @@ void process_input_event(controls_t* controls, input_event_t event)
 
       switch (event.key.scancode)
         {
+        case 17: /* W */
+          controls->up = down;
+          break;
         case 30: /* A */
           controls->left = down;
+          break;
+        case 31: /* S */
+          controls->down = down;
           break;
         case 32: /* D */
           controls->right = down;
@@ -97,8 +100,9 @@ void accept_input(controls_t* controls, entity_t* player, world_t* world)
   input_event_t* events = receive_input_events();
   input_event_t event = events[i++];
 
-  const double walking_speed = 12.0;
-  const double jump_power = 8.0;
+  const double walking_speed = 8.0;
+  const double climbing_speed = 5.0;
+  const double jump_power = 10.0;
 
   while (event.type != TYPE_END)
     {
@@ -113,6 +117,9 @@ void accept_input(controls_t* controls, entity_t* player, world_t* world)
 
   player->vx = controls->right * walking_speed;
   player->vx -= controls->left * walking_speed;
+
+  player->climb = controls->up * climbing_speed;
+  player->climb -= controls->down * climbing_speed;
 
   if (is_cursor_in_range(controls->cursor_x, controls->cursor_y))
     {
@@ -132,20 +139,17 @@ void init_hotbar(tile_t* hotbar)
 {
   tile_t wood = {' ', LIGHT_YELLOW, WHITE};
 
-  tile_t coal = {'*', stone_tile.bg, BLACK};
-  tile_t iron = {'*', stone_tile.bg, BRIGHT_WHITE};
-  tile_t gold = {'*', stone_tile.bg, YELLOW};
   tile_t diamond = {'*', stone_tile.bg, LIGHT_AQUA};
 
-  tile_t glass = {'+', LIGHT_AQUA, BLUE};
+  tile_t glass = {'+', BACKGROUND, BLUE};
 
   hotbar[0] = grass_tile;
   hotbar[1] = dirt_tile;
   hotbar[2] = stone_tile;
   hotbar[3] = wood;
-  hotbar[4] = coal;
-  hotbar[5] = iron;
-  hotbar[6] = gold;
+  hotbar[4] = door_tile;
+  hotbar[5] = ladder_tile;
+  hotbar[6] = spike_tile;
   hotbar[7] = diamond;
   hotbar[8] = glass;
 }
@@ -178,7 +182,7 @@ int main()
       disable_cursor();
 
       accept_input(&controls, player, &world);
-      physics_tick(&world, PHYSICS_DELTA);
+      physics_tick(&world);
 
       frame.world = &world;
       frame.fps = current_fps;

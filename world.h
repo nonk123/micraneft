@@ -17,18 +17,29 @@
 
 typedef unsigned char color_t;
 
+/* Typedeffed to a "small" type to save memory. */
+typedef unsigned char property;
+
 typedef struct tile_t {
-  char character;
+  unsigned char character;
   color_t bg, fg;
+  property properties;
 } tile_t;
+
+enum properties {
+  CLIMBABLE = 1, /* climb this tile with W/S */
+  DOOR = 2, /* only the player can pass through this tile */
+};
 
 typedef struct entity_t {
   struct entity_t* next;
-  tile_t* parts;
-  int ix, iy; /* properly rounded x and y */
   int width, height;
+  tile_t* parts;
   double x, y;
   double vx, vy; /* velocity vector */
+  double climb; /* climbing vertical velocity */
+  int ix, iy; /* properly rounded x and y */
+  int is_player; /* has special effect on stuff */
   int is_on_floor;
 } entity_t;
 
@@ -58,17 +69,26 @@ enum text_color {
 
 /* Common tiles. */
 
-static tile_t empty_tile = {' ', BLACK, WHITE};
+/* The default background color for (transparent) tiles. */
+#define BACKGROUND BLACK
+
+static tile_t empty_tile = {' ', BACKGROUND, WHITE};
 
 static tile_t grass_tile = {' ', GREEN, WHITE};
 static tile_t dirt_tile  = {' ', YELLOW, WHITE};
 static tile_t stone_tile = {' ', WHITE, WHITE};
+
+static tile_t door_tile = {'|', BACKGROUND, YELLOW, DOOR};
+static tile_t ladder_tile = {'#', BACKGROUND, YELLOW, CLIMBABLE};
+static tile_t spike_tile = {'^', BACKGROUND, WHITE}; /* TODO: make it sharp */
 
 world_t generate_world();
 
 int are_tiles_equal(tile_t *, tile_t *);
 
 int is_occupied(tile_t *);
+
+int is_impassable(tile_t *, entity_t *);
 
 int is_cursor_in_range(int, int);
 
@@ -83,6 +103,6 @@ tile_t *get_tile(world_t *, int, int);
 tile_t *get_part(entity_t *, int, int);
 
 /* Goes into tick.c */
-void physics_tick(world_t *, double);
+void physics_tick(world_t *);
 
 #endif /* WORLD_H */

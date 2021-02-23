@@ -11,6 +11,7 @@ A 2D sandbox game for Windows.
 ** Controls
 
 - =A= and =D= to walk.
+- =W= and =S= to climb ladders.
 - Space to jump.
 - Click to place/break blocks.
 - Select blocks with number keys, scrolling, or by clicking the hotbar.
@@ -20,12 +21,13 @@ A 2D sandbox game for Windows.
 
 - Actually readable code (an impossible goal).
 - +Breaking and placing blocks.+
-- Interactive blocks.
+- Special blocks (ladders, doors, etc.)
+- NPCs.
 - +Semi+-proper world generation.
 - Survival, inventory, and crafting.
 - Basic networked multiplayer.
 
-* Building
+** Building
 
 This game is meant to be built with MSVC Build Tools 2019.
 

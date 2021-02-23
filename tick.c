@@ -2,6 +2,8 @@
 
 #include "world.h"
 
+#define DELTA 1.0 / 30.0
+
 /*
  * Run collision detection on ENTITY.
  *
@@ -18,8 +20,8 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
       tile_t* above = get_tile(world, x0, entity->iy + entity->height);
       tile_t* below = get_tile(world, x0, entity->iy - 1);
 
-      if ((is_occupied(above) && entity->vy > 0.0)
-          || (is_occupied(below) && entity->vy < 0.0))
+      if ((is_impassable(above, entity) && entity->vy > 0.0)
+          || (is_impassable(below, entity) && entity->vy < 0.0))
         {
           if (entity->vy < 0.0)
             entity->is_on_floor = 1;
@@ -38,13 +40,13 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
       tile_t* left = get_tile(world, entity->ix - 1, y0);
       tile_t* right = get_tile(world, entity->ix + entity->width, y0);
 
-      if ((is_occupied(left) && entity->vx < 0.0)
-          || (is_occupied(right) && entity->vx > 0.0))
+      if ((is_impassable(left, entity) && entity->vx < 0.0)
+          || (is_impassable(right, entity) && entity->vx > 0.0))
         {
           tile_t* above = get_tile(world, entity->ix, entity->iy + entity->height);
 
           /* Move up one tile if there's enough space. */
-          if (y == 0 && !is_occupied(above))
+          if (y == 0 && !is_impassable(above, entity))
             *y1 += 1;
           else
             {
@@ -55,6 +57,27 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
           break;
         }
     }
+
+  /* Check if we are on top of any climbable tiles. */
+  for (y = 0; y < entity->height; y++)
+    for (x = 0; x < entity->width; x++)
+      {
+        tile_t* tile = get_tile(world, entity->ix + x, entity->iy + y);
+
+        if (tile->properties & CLIMBABLE)
+          {
+            tile_t* below = get_tile(world, entity->ix + x, entity->iy - 1);
+
+            entity->vy = 0.0;
+            *y1 = entity->y;
+
+            if (is_impassable(below, entity) && entity->climb < 0.0)
+              break;
+
+            *y1 += entity->climb * DELTA;
+            break;
+          }
+      }
 }
 
 #define GRAVITY -12.4
@@ -62,7 +85,7 @@ void collide(world_t* world, entity_t* entity, double* x1, double* y1)
 /* Used to determine close-to-zero coordinates. */
 #define EPSILON 0.01
 
-void physics_tick(world_t* world, double delta)
+void physics_tick(world_t* world)
 {
   entity_t* node = world->entities;
 
@@ -71,11 +94,11 @@ void physics_tick(world_t* world, double delta)
       double x1, y1;
 
       /* Acceleration is m * s^(-2) */
-      node->vy += GRAVITY * delta;
+      node->vy += GRAVITY * DELTA;
 
       /* Apply movement. */
-      x1 = node->x + node->vx * delta;
-      y1 = node->y + node->vy * delta;
+      x1 = node->x + node->vx * DELTA;
+      y1 = node->y + node->vy * DELTA;
 
       /* Run collision detection. */
       node->is_on_floor = 0;
