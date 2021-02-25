@@ -1,6 +1,6 @@
 # A makefile for MSVC's nmake.
 
-OBJ = main.obj world.obj console.obj tick.obj print.obj open-simplex-noise.obj
+OBJ = main.obj world.obj open-simplex-noise.obj
 
 micraneft.exe: $(OBJ)
 	$(CC) /Fe:$@ $**
@@ -11,11 +11,8 @@ micraneft.exe: $(OBJ)
 
 open-simplex-noise.obj: open-simplex-noise\open-simplex-noise.h
 
-print.obj: print.h world.h console.h
-tick.obj: world.h
-console.obj: console.h
-world.obj: world.h console.h open-simplex-noise\open-simplex-noise.h
-main.obj: print.h world.h console.h
+world.obj: world.h open-simplex-noise\open-simplex-noise.h
+main.obj: world.h ..\conge\conge.h
 
 clean:
 	-rm micraneft.exe $(OBJ)

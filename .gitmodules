@@ -1,3 +1,6 @@
 [submodule "open-simplex-noise-in-c"]
 	path = open-simplex-noise
 	url = https://github.com/smcameron/open-simplex-noise-in-c.git
+[submodule "conge"]
+	path = conge
+	url = https://github.com/nonk123/conge.git

@@ -21,10 +21,10 @@ A 2D sandbox game for Windows.
 
 - Actually readable code (an impossible goal).
 - +Breaking and placing blocks.+
-- Special blocks (ladders, doors, etc.)
+- +Special blocks (ladders, doors, etc.)+
 - NPCs.
-- +Semi+-proper world generation.
 - Survival, inventory, and crafting.
+- +Semi+-proper world generation.
 - Basic networked multiplayer.
 
 ** Building

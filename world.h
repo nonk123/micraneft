@@ -1,6 +1,8 @@
 #ifndef WORLD_H
 #define WORLD_H
 
+#include <stdlib.h>
+
 #define WORLD_WIDTH 1024
 #define WORLD_HEIGHT 128
 
@@ -43,11 +45,7 @@ typedef struct entity_t {
   int is_on_floor;
 } entity_t;
 
-typedef struct world_t {
-  tile_t* tiles;
-  entity_t* entities; /* a linked list */
-} world_t;
-
+/* Pretty much the redefinition of conge's stuff. */
 enum text_color {
   BLACK,
   BLUE,
@@ -82,27 +80,26 @@ static tile_t door_tile = {'|', BACKGROUND, YELLOW, DOOR};
 static tile_t ladder_tile = {'#', BACKGROUND, YELLOW, CLIMBABLE};
 static tile_t spike_tile = {'^', BACKGROUND, WHITE}; /* TODO: make it sharp */
 
-world_t generate_world();
+void generate_world();
 
-int are_tiles_equal(tile_t *, tile_t *);
+entity_t* get_entities();
 
-int is_occupied(tile_t *);
+int are_tiles_equal(tile_t*, tile_t*);
 
-int is_impassable(tile_t *, entity_t *);
+int is_occupied(tile_t*);
+
+int is_impassable(tile_t*, entity_t*);
 
 int is_cursor_in_range(int, int);
 
-int can_place_tile_at(world_t *, int, int);
+int can_place_tile_at(int, int);
 
-void place_tile_at(world_t *, int, int, tile_t);
+void place_tile_at(int, int, tile_t);
 
-void remove_tile_at(world_t *, int, int);
+void remove_tile_at(int, int);
 
-tile_t *get_tile(world_t *, int, int);
+tile_t* get_tile(int, int);
 
-tile_t *get_part(entity_t *, int, int);
-
-/* Goes into tick.c */
-void physics_tick(world_t *);
+tile_t* get_part(entity_t*, int, int);
 
 #endif /* WORLD_H */

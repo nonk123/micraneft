@@ -6,7 +6,10 @@
 
 #include "open-simplex-noise/open-simplex-noise.h"
 
-#include "console.h"
+static struct {
+  tile_t* tiles;
+  entity_t* entities; /* a linked list */
+} world = {NULL, NULL};
 
 void initialize_player(entity_t* player)
 {
@@ -21,7 +24,9 @@ void initialize_player(entity_t* player)
   player->ix = round(player->x);
   player->iy = round(player->y);
 
-  player->vx = player->vy = 0.0;
+  player->vx = 0.0;
+  player->vy = 0.0;
+  player->climb = 0.0;
 
   player->width = 1;
   player->height = 2;
@@ -33,14 +38,17 @@ void initialize_player(entity_t* player)
   player->next = NULL;
 }
 
-world_t generate_world()
+void generate_world()
 {
   int x, y, i;
 
   tile_t* buffer = calloc(WORLD_WIDTH * WORLD_HEIGHT, sizeof(tile_t));
-
   entity_t* player = malloc(sizeof(entity_t));
-  world_t world = {buffer, player};
+
+  /* TODO: free previous tiles and entities. */
+
+  world.tiles = buffer;
+  world.entities = player;
 
   struct osn_context* osn;
 
@@ -55,26 +63,29 @@ world_t generate_world()
       int height = GROUND_HEIGHT + HILLS_HEIGHT * positive;
 
       for (y = 0; y < height - DIRT_LAYER - GRASS_LAYER; y++)
-        *get_tile(&world, x, y) = stone_tile;
+        *get_tile(x, y) = stone_tile;
 
       for (i = 0; i < DIRT_LAYER; i++, y++)
-        *get_tile(&world, x, y) = dirt_tile;
+        *get_tile(x, y) = dirt_tile;
 
       for (i = 0; i < GRASS_LAYER; i++, y++)
-        *get_tile(&world, x, y) = grass_tile;
+        *get_tile(x, y) = grass_tile;
 
       /* Spawn the player in the center of the map. */
       if (x == WORLD_WIDTH / 2)
         player->y = y;
 
       for (; y < WORLD_HEIGHT; y++)
-        *get_tile(&world, x, y) = empty_tile;
+        *get_tile(x, y) = empty_tile;
     }
 
   open_simplex_noise_free(osn);
   initialize_player(player);
+}
 
-  return world;
+entity_t* get_entities()
+{
+  return world.entities;
 }
 
 int are_tiles_equal(tile_t* a, tile_t* b)
@@ -99,11 +110,11 @@ int is_cursor_in_range(int x, int y)
   return pow(x, 2.0) + pow(y, 2.0) <= 49.0;
 }
 
-int can_place_tile_at(world_t* world, int x, int y)
+int can_place_tile_at(int x, int y)
 {
-  entity_t* node = world->entities;
+  entity_t* node = world.entities;
 
-  if (is_occupied(get_tile(world, x, y)))
+  if (is_occupied(get_tile(x, y)))
     return 0;
 
   /* Ensure it's not occupied by an entity. */
@@ -119,10 +130,10 @@ int can_place_tile_at(world_t* world, int x, int y)
   if (x > 0 && y > 0 && x < WORLD_WIDTH - 1 && y < WORLD_HEIGHT - 1)
     {
       /* Check if the tile is connected to another tile. */
-      tile_t* left  = get_tile(world, x - 1, y);
-      tile_t* right = get_tile(world, x + 1, y);
-      tile_t* below = get_tile(world, x, y - 1);
-      tile_t* above = get_tile(world, x, y + 1);
+      tile_t* left  = get_tile(x - 1, y);
+      tile_t* right = get_tile(x + 1, y);
+      tile_t* below = get_tile(x, y - 1);
+      tile_t* above = get_tile(x, y + 1);
 
       if (!is_occupied(left) && !is_occupied(right)
           && !is_occupied(above) && !is_occupied(below))
@@ -132,22 +143,21 @@ int can_place_tile_at(world_t* world, int x, int y)
   return 1;
 }
 
-void place_tile_at(world_t* world, int x, int y, tile_t tile)
+void place_tile_at(int x, int y, tile_t tile)
 {
-  if (can_place_tile_at(world, x, y))
-    *get_tile(world, x, y) = tile;
+  if (can_place_tile_at(x, y))
+    *get_tile(x, y) = tile;
 }
 
-void remove_tile_at(world_t* world, int x, int y)
+void remove_tile_at(int x, int y)
 {
   if (x >= 0 && y >= 0 && x < WORLD_WIDTH && y < WORLD_HEIGHT)
-    *get_tile(world, x, y) = empty_tile;
+    *get_tile(x, y) = empty_tile;
 }
 
-tile_t* get_tile(world_t* world, int x, int y)
+tile_t* get_tile(int x, int y)
 {
-  int y_flipped = WORLD_HEIGHT - 1 - y;
-  return &world->tiles[WORLD_WIDTH * y_flipped + x];
+  return &world.tiles[WORLD_WIDTH * y + x];
 }
 
 tile_t* get_part(entity_t* entity, int x, int y)
