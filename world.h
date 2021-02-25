@@ -8,8 +8,6 @@
 
 #define GROUND_HEIGHT 64
 #define HILLS_HEIGHT 32
-
-/* The height of the grass layer. */
 #define GRASS_LAYER 2
 
 /* Place this many blocks of dirt below grass. Everything below this is stone. */
@@ -22,19 +20,24 @@ typedef unsigned char color_t;
 /* Typedeffed to a "small" type to save memory. */
 typedef unsigned char property;
 
-typedef struct tile_t {
+typedef struct tile_t tile_t;
+struct tile_t
+{
   unsigned char character;
   color_t bg, fg;
   property properties;
-} tile_t;
-
-enum properties {
-  CLIMBABLE = 1, /* climb this tile with W/S */
-  DOOR = 2, /* only the player can pass through this tile */
 };
 
-typedef struct entity_t {
-  struct entity_t* next;
+enum properties
+  {
+    CLIMBABLE = 1, /* climb this tile with W/S */
+    DOOR = 2, /* only the player can pass through this tile */
+  };
+
+typedef struct entity_t entity_t;
+struct entity_t
+{
+  entity_t* next;
   int width, height;
   tile_t* parts;
   double x, y;
@@ -43,27 +46,28 @@ typedef struct entity_t {
   int ix, iy; /* properly rounded x and y */
   int is_player; /* has special effect on stuff */
   int is_on_floor;
-} entity_t;
+};
 
 /* Pretty much the redefinition of conge's stuff. */
-enum text_color {
-  BLACK,
-  BLUE,
-  GREEN,
-  AQUA,
-  RED,
-  PURPLE,
-  YELLOW,
-  WHITE,
-  GRAY,
-  LIGHT_BLUE,
-  LIGHT_GREEN,
-  LIGHT_AQUA,
-  LIGHT_RED,
-  LIGHT_PURPLE,
-  LIGHT_YELLOW,
-  BRIGHT_WHITE,
-};
+enum text_color
+  {
+    BLACK,
+    BLUE,
+    GREEN,
+    AQUA,
+    RED,
+    PURPLE,
+    YELLOW,
+    WHITE,
+    GRAY,
+    LIGHT_BLUE,
+    LIGHT_GREEN,
+    LIGHT_AQUA,
+    LIGHT_RED,
+    LIGHT_PURPLE,
+    LIGHT_YELLOW,
+    BRIGHT_WHITE,
+  };
 
 /* Common tiles. */
 
@@ -80,26 +84,37 @@ static tile_t door_tile = {'|', BACKGROUND, YELLOW, DOOR};
 static tile_t ladder_tile = {'#', BACKGROUND, YELLOW, CLIMBABLE};
 static tile_t spike_tile = {'^', BACKGROUND, WHITE}; /* TODO: make it sharp */
 
-void generate_world();
+void
+generate_world (void);
 
-entity_t* get_entities();
+entity_t*
+get_entities (void);
 
-int are_tiles_equal(tile_t*, tile_t*);
+int
+are_tiles_equal (tile_t, tile_t);
 
-int is_occupied(tile_t*);
+int
+is_occupied (tile_t);
 
-int is_impassable(tile_t*, entity_t*);
+int
+is_impassable (tile_t, entity_t*);
 
-int is_cursor_in_range(int, int);
+int
+is_cursor_in_range (int, int);
 
-int can_place_tile_at(int, int);
+int
+can_place_tile_at (int, int, tile_t, entity_t*);
 
-void place_tile_at(int, int, tile_t);
+void
+place_tile_at (int, int, tile_t, entity_t*);
 
-void remove_tile_at(int, int);
+void
+remove_tile_at (int, int);
 
-tile_t* get_tile(int, int);
+tile_t*
+get_tile (int, int);
 
-tile_t* get_part(entity_t*, int, int);
+tile_t*
+get_part (entity_t*, int, int);
 
 #endif /* WORLD_H */

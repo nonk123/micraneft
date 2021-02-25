@@ -17,16 +17,6 @@ A 2D sandbox game for Windows.
 - Select blocks with number keys, scrolling, or by clicking the hotbar.
 - Esc to exit.
 
-** Plans
-
-- Actually readable code (an impossible goal).
-- +Breaking and placing blocks.+
-- +Special blocks (ladders, doors, etc.)+
-- NPCs.
-- Survival, inventory, and crafting.
-- +Semi+-proper world generation.
-- Basic networked multiplayer.
-
 ** Building
 
 This game is meant to be built with MSVC Build Tools 2019.

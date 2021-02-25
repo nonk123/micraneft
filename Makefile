@@ -14,5 +14,7 @@ open-simplex-noise.obj: open-simplex-noise\open-simplex-noise.h
 world.obj: world.h open-simplex-noise\open-simplex-noise.h
 main.obj: world.h ..\conge\conge.h
 
+.PHONY: clean
+
 clean:
 	-rm micraneft.exe $(OBJ)
